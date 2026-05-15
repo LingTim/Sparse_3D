@@ -1,0 +1,31 @@
+# 基礎數值運算與影像處理
+numpy>=2.2.6
+pillow>=11.3.0
+opencv-contrib-python==4.13.0.92
+scipy>=1.15.3
+scikit-image>=0.25.2
+tqdm==4.67.3
+plyfile
+
+# Zero123++ 與 生成模型相關 (放寬版本限制以解決衝突)
+diffusers>=0.20.2
+transformers>=4.30.2
+accelerate>=0.21.0
+huggingface-hub>=0.28.0
+omegaconf>=2.3.0
+safetensors>=0.7.0
+# 保持原本的 git 安裝方式 
+segment_anything @ git+https://github.com/facebookresearch/segment-anything.git@dca509fe793f601edb92606367a655c15ac00fdf
+
+# 介面與工具
+gradio==6.12.0
+rembg>=2.0.60
+onnxruntime>=1.20.0
+fire>=0.7.1
+triton>=3.6.0
+
+# 系統底層組件
+filelock>=3.13.0
+typing_extensions>=4.15.0
+requests>=2.33.1
+PyYAML>=6.0.3
