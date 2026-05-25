@@ -24,7 +24,7 @@ os.makedirs(output_dir, exist_ok=True)
 # 載入 Zero123++ 模型
 print("正在載入 Zero123++ 模型...")
 pipeline = DiffusionPipeline.from_pretrained(
-    "sudo-ai/zero123plus-v1.1", custom_pipeline="sudo-ai/zero123plus-pipeline",
+    "sudo-ai/zero123plus-v1.2", custom_pipeline="sudo-ai/zero123plus-pipeline",
     torch_dtype=torch.float16, trust_remote_code=True
 )
 pipeline.scheduler = EulerAncestralDiscreteScheduler.from_config(
