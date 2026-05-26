@@ -17,3 +17,4 @@ gaussian-splatting/output/
 zero123plus/checkpoints/
 
 .DS_Store
+output_model/
