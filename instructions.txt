@@ -49,8 +49,15 @@ python gaussian-splatting/train.py -s zero123plus/output -m output_model --itera
 1. generate 6 multi-view image from zero123++
 python zero123plus/examples/img_to_mv.py <image path>
 
-2. use 6 multi-view image from zero123++ to train in 3DGS
+2. compute the extrinsic matrix
+python zero123plus/generate_cameras.py
+
+3. copy the transforms_train.json and rename the second transforms_train.json to transforms_test.json
+
+4. Confirm that transforms_train.json and transforms_test.json and 6 multi_view image are all in the same folder, which should be zero123plus/output by default.
+
+5. use 6 multi-view image from zero123++ to train in 3DGS
 python gaussian-splatting/train.py -s <multi-view image path> -m <where to save the model> --iterations 3000 --white_background --sh_degree 0 --densify_grad_threshold 0.0005
 
-3. use SIBR_gaussianViewer_app.exe to check the outcome (ps. you need to download SIBR_gaussianViewer_app.exe)
+6. use SIBR_gaussianViewer_app.exe to check the outcome (ps. you need to download SIBR_gaussianViewer_app.exe)
 <SIBR_gaussianViewer_app.exe path> -m <model path>
