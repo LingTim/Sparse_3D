@@ -1,0 +1,56 @@
+#
+# virtual environment
+#
+
+conda activate sparse_3d
+conda deactivate
+
+#
+# 3DGS instructions
+#
+
+# render
+python gaussian-splatting/render.py -m <model path> -s <source path>
+python gaussian-splatting/render.py -m pretrained_models/truck -s datasets/input/tandt/truck
+
+# train
+python gaussian-splatting/train.py -s <source path> --model_path <model path>
+python gaussian-splatting/train.py -s datasets/input/tandt/train --model_path output/train_test
+
+#
+# zero123++ instructions
+#
+
+#image to multi-view
+python zero123plus/examples/img_to_mv.py <image path>
+python zero123plus/examples/img_to_mv.py resources/examples/extinguisher.png
+
+#compute extrinsics
+python zero123plus/generate_cameras.py
+
+#
+# check the outcome from the traning of 3DGS
+#
+
+<SIBR_gaussianViewer_app.exe path> -m <model path>
+Desktop\viewers\bin\SIBR_gaussianViewer_app.exe -m \\wsl.localhost\Ubuntu\home\huitinglin\Sparse_3D\output_model
+
+#
+# use 6 multi-view image from zero123++ to train in 3DGS
+#
+
+python gaussian-splatting/train.py -s <multi-view image path> -m <where to save the model> --iterations 3000 --white_background --sh_degree 0 --densify_grad_threshold 0.0005
+python gaussian-splatting/train.py -s zero123plus/output -m output_model --iterations 3000 --white_background --sh_degree 0 --densify_grad_threshold 0.0005
+
+#
+# the steps of using zero123++ and 3DGS to generate point cloud after you setting environment done
+#
+
+1. generate 6 multi-view image from zero123++
+python zero123plus/examples/img_to_mv.py <image path>
+
+2. use 6 multi-view image from zero123++ to train in 3DGS
+python gaussian-splatting/train.py -s <multi-view image path> -m <where to save the model> --iterations 3000 --white_background --sh_degree 0 --densify_grad_threshold 0.0005
+
+3. use SIBR_gaussianViewer_app.exe to check the outcome (ps. you need to download SIBR_gaussianViewer_app.exe)
+<SIBR_gaussianViewer_app.exe path> -m <model path>
