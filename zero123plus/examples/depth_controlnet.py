@@ -5,8 +5,9 @@ from diffusers import DiffusionPipeline, EulerAncestralDiscreteScheduler, Contro
 
 # Load the pipeline
 pipeline = DiffusionPipeline.from_pretrained(
-    "sudo-ai/zero123plus-v1.1", custom_pipeline="sudo-ai/zero123plus-pipeline",
-    torch_dtype=torch.float16
+    "sudo-ai/zero123plus-v1.2", custom_pipeline="sudo-ai/zero123plus-pipeline",
+    torch_dtype=torch.float16,
+    trust_remote_code=True
 )
 pipeline.add_controlnet(ControlNetModel.from_pretrained(
     "sudo-ai/controlnet-zp11-depth-v1", torch_dtype=torch.float16
@@ -21,4 +22,4 @@ cond = Image.open(requests.get("https://d.skis.ltd/nrp/sample-data/0_cond.png", 
 depth = Image.open(requests.get("https://d.skis.ltd/nrp/sample-data/0_depth.png", stream=True).raw)
 result = pipeline(cond, depth_image=depth, num_inference_steps=36).images[0]
 result.show()
-result.save("output.png")
+result.save("depth_output.png")

@@ -23,7 +23,11 @@ python gaussian-splatting/train.py -s datasets/input/tandt/train --model_path ou
 
 #image to multi-view
 python zero123plus/examples/img_to_mv.py <image path>
-python zero123plus/examples/img_to_mv.py resources/examples/extinguisher.png
+python zero123plus/examples/img_to_mv.py zero123plus/resources/examples/chair.png
+
+#normal generation
+python zero123plus/examples/normal_gen.py <image path>
+python zero123plus/examples/normal_gen.py zero123plus/resources/examples/hamburger.png
 
 #compute extrinsics
 python zero123plus/generate_cameras.py

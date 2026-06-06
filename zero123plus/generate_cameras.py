@@ -71,7 +71,14 @@ def main():
     }
     
     # 輸出至 JSON 檔案
-    output_path = "zero123plus/output/transforms_train.json"
+    output_path = "output/transforms_train.json"
+    os.makedirs("output", exist_ok=True)
+    with open(output_path, "w") as f:
+        json.dump(transforms_dict, f, indent=4)
+        
+    print(f"✅ 成功產生相機參數檔案: {output_path}")
+
+    output_path = "output/transforms_test.json"
     os.makedirs("output", exist_ok=True)
     with open(output_path, "w") as f:
         json.dump(transforms_dict, f, indent=4)

@@ -5,3 +5,4 @@ tmp
 output*
 venv/*
 weights/*
+resources/
