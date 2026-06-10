@@ -1,7 +1,7 @@
 import os
 import cv2
 import copy
-import numpy
+import numpy as np  # 修改為標準簡寫
 import torch
 import argparse
 from PIL import Image
@@ -27,12 +27,12 @@ os.makedirs(output_dir, exist_ok=True)
 
 def rescale(single_res, input_image, ratio=0.95):
     # Rescale and recenter
-    image_arr = numpy.array(input_image)
-    ret, mask = cv2.threshold(numpy.array(input_image.split()[-1]), 0, 255, cv2.THRESH_BINARY)
+    image_arr = np.array(input_image)
+    ret, mask = cv2.threshold(np.array(input_image.split()[-1]), 0, 255, cv2.THRESH_BINARY)
     x, y, w, h = cv2.boundingRect(mask)
     max_size = max(w, h)
     side_len = int(max_size / ratio)
-    padded_image = numpy.zeros((side_len, side_len, 4), dtype=numpy.uint8)
+    padded_image = np.zeros((side_len, side_len, 4), dtype=np.uint8)
     center = side_len//2
     padded_image[center-h//2:center-h//2+h, center-w//2:center-w//2+w] = image_arr[y:y+h, x:x+w]
     rgba = Image.fromarray(padded_image).resize((single_res, single_res), Image.LANCZOS)
@@ -77,10 +77,76 @@ normalimg = normal_pipeline(
 print("正在執行高級幾何去背與優化...")
 genimg, normalimg = postprocess(genimg, normalimg)
 
-# ✨ 核心技術優化：將顏色圖的 Alpha 遮罩完美注入法線圖中，實現法線圖透明去背
-_, _, _, alpha_channel = genimg.split()
-normalimg_rgba = normalimg.convert("RGB")
-normalimg_rgba.putalpha(alpha_channel)
+
+# ==================== 🛠️ 核心修復與優化區塊 ====================
+print("正在進行二次深度去背與灰色背景清除...")
+
+# 轉 numpy
+genimg_rgba = np.array(genimg.convert("RGBA"))
+normalimg_rgb = np.array(normalimg.convert("RGB"))
+
+# 原始 Alpha
+alpha = genimg_rgba[:, :, 3]
+
+# Alpha 二值化
+_, alpha_thresh = cv2.threshold(alpha, 180, 255, cv2.THRESH_BINARY)
+
+# 形態學去噪
+kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+alpha_cleaned = cv2.morphologyEx(alpha_thresh, cv2.MORPH_OPEN, kernel)
+
+# 套用 Alpha
+genimg_rgba[:, :, 3] = alpha_cleaned
+
+# ==================================================
+# 額外清除所有近似灰色背景
+# ==================================================
+
+rgb = genimg_rgba[:, :, :3]
+
+hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
+
+# 飽和度
+sat = hsv[:, :, 1]
+
+# 亮度
+val = hsv[:, :, 2]
+
+# 低飽和度 + 中高亮度 = 灰色背景
+gray_mask = (
+    (sat < 25) &
+    (val > 60)
+)
+
+# 灰色區域直接透明
+genimg_rgba[gray_mask, 3] = 0
+
+# 更新 Alpha
+alpha_final = genimg_rgba[:, :, 3]
+
+# 背景洗白
+genimg_rgba[alpha_final == 0, 0:3] = [255, 255, 255]
+
+# ==================================================
+# 法線圖同步套用同樣透明區域
+# ==================================================
+
+normalimg_rgba_np = np.zeros(
+    (normalimg_rgb.shape[0], normalimg_rgb.shape[1], 4),
+    dtype=np.uint8
+)
+
+normalimg_rgba_np[:, :, 0:3] = normalimg_rgb
+normalimg_rgba_np[:, :, 3] = alpha_final
+
+normalimg_rgba_np[alpha_final == 0, 0:3] = [255, 255, 255]
+
+# 轉回 PIL
+genimg = Image.fromarray(genimg_rgba)
+normalimg_rgba = Image.fromarray(normalimg_rgba_np)
+
+# =============================================================
+
 
 # 儲存網格大圖
 grid_colors_path = os.path.join(output_dir, "grid_colors.png")

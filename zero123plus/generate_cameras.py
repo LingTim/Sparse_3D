@@ -59,7 +59,7 @@ def main():
         
         # 建立單個 frame 的資訊
         frame = {
-            "file_path": f"view_{params['id']}",
+            "file_path": f"train/view_{params['id']}",
             "transform_matrix": c2w.tolist()
         }
         frames.append(frame)
@@ -71,15 +71,8 @@ def main():
     }
     
     # 輸出至 JSON 檔案
-    output_path = "output/transforms_train.json"
-    os.makedirs("output", exist_ok=True)
-    with open(output_path, "w") as f:
-        json.dump(transforms_dict, f, indent=4)
-        
-    print(f"✅ 成功產生相機參數檔案: {output_path}")
-
-    output_path = "output/transforms_test.json"
-    os.makedirs("output", exist_ok=True)
+    output_path = "dataset/flower/transforms_train.json"
+    os.makedirs("dataset/flower", exist_ok=True)
     with open(output_path, "w") as f:
         json.dump(transforms_dict, f, indent=4)
         

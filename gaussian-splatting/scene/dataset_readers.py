@@ -270,6 +270,7 @@ def readCamerasFromTransforms(path, transformsfile, depths_folder, white_backgro
             
     return cam_infos
 
+''' old version
 def readNerfSyntheticInfo(path, white_background, depths, eval, extension=".png"):
 
     depths_folder=os.path.join(path, depths) if depths != "" else ""
@@ -299,6 +300,54 @@ def readNerfSyntheticInfo(path, white_background, depths, eval, extension=".png"
     try:
         pcd = fetchPly(ply_path)
     except:
+        pcd = None
+
+    scene_info = SceneInfo(point_cloud=pcd,
+                           train_cameras=train_cam_infos,
+                           test_cameras=test_cam_infos,
+                           nerf_normalization=nerf_normalization,
+                           ply_path=ply_path,
+                           is_nerf_synthetic=True)
+    return scene_info
+'''
+
+def readNerfSyntheticInfo(path, white_background, depths, eval, extension=".png"):
+
+    depths_folder=os.path.join(path, depths) if depths != "" else ""
+    print("Reading Training Transforms")
+    train_cam_infos = readCamerasFromTransforms(path, "transforms_train.json", depths_folder, white_background, False, extension)
+    print("Reading Test Transforms")
+    test_cam_infos = readCamerasFromTransforms(path, "transforms_test.json", depths_folder, white_background, True, extension)
+    
+    if not eval:
+        train_cam_infos.extend(test_cam_infos)
+        test_cam_infos = []
+
+    nerf_normalization = getNerfppNorm(train_cam_infos)
+
+    # 【對齊修正】統一使用您 3DGS 原始碼內建的小寫 points3d.ply
+    ply_path = os.path.join(path, "points3d.ply")
+    
+    # 【核心修改】：檢查是否已經存在我們手動雕刻好的 Visual Hull 點雲
+    # 如果不存在，才執行原版的隨機撒點邏輯
+    if not os.path.exists(ply_path):
+        # Since this data set has no colmap data, we start with random points
+        num_pts = 100_000
+        print(f"Generating random point cloud ({num_pts})...")
+        
+        # We create random points inside the bounds of the synthetic Blender scenes
+        xyz = np.random.random((num_pts, 3)) * 2.6 - 1.3
+        shs = np.random.random((num_pts, 3)) / 255.0
+        pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)))
+
+        storePly(ply_path, xyz, SH2RGB(shs) * 255)
+    else:
+        print(f"==> [🔔 完美對接] 偵測到預先生成的 Visual Hull 點雲 ({ply_path})，將直接載入高品質幾何結構！")
+
+    try:
+        pcd = fetchPly(ply_path)
+    except Exception as e:
+        print(f"==> [❌ 錯誤] 載入自訂 PLY 檔案失敗，原因: {e}")
         pcd = None
 
     scene_info = SceneInfo(point_cloud=pcd,

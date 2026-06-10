@@ -23,11 +23,11 @@ python gaussian-splatting/train.py -s datasets/input/tandt/train --model_path ou
 
 #image to multi-view
 python zero123plus/examples/img_to_mv.py <image path>
-python zero123plus/examples/img_to_mv.py zero123plus/resources/examples/chair.png
+python zero123plus/examples/img_to_mv.py input/tree1.png
 
 #normal generation
 python zero123plus/examples/normal_gen.py <image path>
-python zero123plus/examples/normal_gen.py zero123plus/resources/examples/hamburger.png
+python zero123plus/examples/normal_gen.py input/tree1.png
 
 #compute extrinsics
 python zero123plus/generate_cameras.py
@@ -44,7 +44,7 @@ Desktop\viewers\bin\SIBR_gaussianViewer_app.exe -m \\wsl.localhost\Ubuntu\home\h
 #
 
 python gaussian-splatting/train.py -s <multi-view image path> -m <where to save the model> --iterations 3000 --white_background --sh_degree 0 --densify_grad_threshold 0.0005
-python gaussian-splatting/train.py -s zero123plus/output -m output_model --iterations 3000 --white_background --sh_degree 0 --densify_grad_threshold 0.0005
+python gaussian-splatting/train.py -s output -m output_model --iterations 3000 --white_background --sh_degree 0 --densify_grad_threshold 0.0005
 
 #
 # the steps of using zero123++ and 3DGS to generate point cloud after you setting environment done
@@ -65,3 +65,15 @@ python gaussian-splatting/train.py -s <multi-view image path> -m <where to save 
 
 6. use SIBR_gaussianViewer_app.exe to check the outcome (ps. you need to download SIBR_gaussianViewer_app.exe)
 <SIBR_gaussianViewer_app.exe path> -m <model path>
+
+
+
+python zero123plus/examples/img_to_mv.py dataset/carrot/input.png
+python zero123plus/examples/normal_gen.py dataset/flower/input.png
+python zero123plus/generate_cameras.py
+python generate_visual_hull.py
+python gaussian-splatting/train.py -s dataset/flower -m output_model/flower --iterations 3000 --white_background --sh_degree 0 --densify_grad_threshold 0.0005 --eval
+Desktop\viewers\bin\SIBR_gaussianViewer_app.exe -m \\wsl.localhost\Ubuntu\home\huitinglin\Sparse_3D\output_model
+python gaussian-splatting/render.py -m output_model/flower -s dataset/flower
+python evaluate_metrics.py
+python evaluate_train_metrics.py

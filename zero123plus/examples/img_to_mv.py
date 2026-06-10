@@ -18,7 +18,7 @@ if not os.path.exists(input_img_path):
     exit(1)
 
 # 2. 建立 output 資料夾
-output_dir = "output"
+output_dir = "dataset/carrot"
 os.makedirs(output_dir, exist_ok=True)
 
 # 載入 Zero123++ 模型
